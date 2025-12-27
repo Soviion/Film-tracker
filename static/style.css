@@ -102,3 +102,82 @@ button:hover {
     color: #ff5252;
     margin: 50px 0;
 }
+
+.search h2 {
+    margin-bottom: 20px;
+}
+
+.search-form {
+    background: #1e1e1e;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 15px;
+    align-items: end;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full-width {
+    grid-column: span 3;
+}
+
+.form-group label {
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #00bcd4;
+    font-size: 14px;
+}
+
+.form-group input,
+.form-group select {
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    background: #2d2d2d;
+    color: #eee;
+    font-size: 16px;
+    outline: none;
+    transition: background 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    background: #383838;
+    box-shadow: 0 0 0 2px #00bcd4;
+}
+
+.search-btn {
+    display: block;
+    margin: 25px auto 0;
+    padding: 14px 40px;
+    font-size: 18px;
+    background: linear-gradient(135deg, #00bcd4, #0097a7);
+    box-shadow: 0 4px 10px rgba(0, 188, 212, 0.4);
+}
+
+.search-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 188, 212, 0.5);
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-group.full-width {
+        grid-column: span 1;
+    }
+}

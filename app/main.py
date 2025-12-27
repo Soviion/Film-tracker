@@ -52,3 +52,6 @@ async def add_to_list(item: WatchedItemCreate, db: Session = Depends(get_db)):
         raise HTTPException(400, "Этот фильм/сериал уже в вашем списке")
     return result
     
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)
