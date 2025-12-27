@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой трекер фильмов и сериалов</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 Мой трекер фильмов и сериалов</h1>
+
+        <div class="search">
+            <input type="text" id="query" placeholder="Поиск: Matrix 1999, Breaking Bad, Гарри Поттер...">
+            <button onclick="search()">Найти</button>
+        </div>
+
+        <div id="results"></div>
+
+        <h2>Мой список ({{ my_list|length }})</h2>
+        {% if my_list|length == 0 %}
+            <p style="text-align:center; color:#888;">Пока пусто. Найди что-нибудь и добавь в трекер!</p>
+        {% endif %}
+        <div class="my-list">
+            {% for item in my_list %}
+            <div class="card">
+                {% if item.poster_url and item.poster_url != 'https://via.placeholder.com/300x450?text=Нет+постера' %}
+                <img src="{{ item.poster_url }}" alt="{{ item.title }}">
+                {% else %}
+                <img src="https://via.placeholder.com/300x450?text=Нет+постера" alt="Нет постера">
+                {% endif %}
+                <h3>{{ item.title }}</h3>
+                <p>{{ item.year or 'Год неизвестен' }}</p>
+                <p class="status">{{ item.status | capitalize }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        async function search() {
+            const q = document.getElementById('query').value.trim();
+            if (!q) {
+                alert('Введите название!');
+                return;
+            }
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p class="no-results">Ищем...</p>';
+
+            try {
+                const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+                const data = await res.json();
+
+                if (data.error) {
+                    resultsDiv.innerHTML = `<p class="no-results">${data.error}</p>`;
+                    return;
+                }
+
+                if (data.results.length === 0) {
+                    resultsDiv.innerHTML = '<p class="no-results">Ничего не найдено 😔<br>Попробуй другой запрос (например, английское название + год)</p>';
+                    return;
+                }
+
+                let html = '<div class="results">';
+                data.results.forEach(item => {
+                    const poster = item.poster_url && item.poster_url !== 'N/A' 
+                        ? item.poster_url 
+                        : 'https://via.placeholder.com/300x450?text=Нет+постера';
+                    const type = item.media_type === 'movie' ? 'Фильм' : 'Сериал';
+                    const safeTitle = item.title.replace(/"/g, '&quot;');
+
+                    html += `
+                    <div class="card">
+                        <img src="${poster}" alt="${safeTitle}">
+                        <h3>${safeTitle}</h3>
+                        <p>${item.year || 'Год неизвестен'}</p>
+                        <p>${type}</p>
+                        <button class="add-btn" onclick='addToList("${item.imdb_id}", "${safeTitle}", "${item.year || ''}", "${item.media_type}", "${poster}")'>
+                            Добавить в трекер
+                        </button>
+                    </div>`;
+                });
+                html += '</div>';
+                resultsDiv.innerHTML = html;
+            } catch (err) {
+                resultsDiv.innerHTML = '<p class="no-results">Ошибка сети</p>';
+            }
+        }
+
+        async function addToList(imdb_id, title, year, media_type, poster_url) {
+            try {
+                const response = await fetch('/api/my-list', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        imdb_id,
+                        title,
+                        year,
+                        media_type,
+                        poster_url: poster_url.includes('placeholder') ? null : poster_url
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Добавлено в трекер!');
+                    location.reload();
+                } else {
+                    const err = await response.json();
+                    alert('Ошибка: ' + (err.detail || 'Уже в списке'));
+                }
+            } catch (err) {
+                alert('Ошибка подключения');
+            }
+        }
+
+        // Поиск по Enter
+        document.getElementById('query').addEventListener('keypress', e => {
+            if (e.key === 'Enter') search();
+        });
+    </script>
+</body>
+</html>
