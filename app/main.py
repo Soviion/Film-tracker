@@ -38,8 +38,12 @@ async def home(request: Request, db: Session = Depends(get_db)):
     })
 
 @app.get("/api/search")
-async def api_search(q: str = Query(...)):
-    return await search_media(q)
+async def api_search(
+    q: str = Query(..., description="Название"),
+    type: str = Query(None, description="movie, series или пусто"),
+    year: int = Query(None, description="Год выпуска")
+):
+    return await search_media(q, type, year)
 
 @app.post("/api/my-list")
 async def add_to_list(item: WatchedItemCreate, db: Session = Depends(get_db)):

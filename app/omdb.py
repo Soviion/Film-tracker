@@ -8,21 +8,27 @@ OMDB_API_KEY = os.getenv("OMDB_API_KEY")
 OMDB_URL = "http://www.omdbapi.com/"
 POSTER_PLACEHOLDER = "https://via.placeholder.com/500x750?text=Нет+постера"
 
-async def search_media(query: str):
+async def search_media(query: str, media_type: str = None, year: int = None):
     if not OMDB_API_KEY:
         raise Exception("OMDB_API_KEY не указан в .env")
 
-    if len(query.strip()) < 3:
+    if not query or len(query.strip()) < 3:
         return {
             "results": [],
             "total_results": 0,
-            "error": "Запрос слишком короткий (минимум 3 символа)"
+            "error": "Введите название (минимум 3 символа)"
         }
 
     params = {
         "apikey": OMDB_API_KEY,
         "s": query.strip()
     }
+
+    if media_type and media_type in ["movie", "series", "episode"]:
+        params["type"] = media_type
+
+    if year:
+        params["y"] = str(year)
 
     async with httpx.AsyncClient() as client:
         response = await client.get(OMDB_URL, params=params, timeout=30.0)
@@ -32,7 +38,7 @@ async def search_media(query: str):
     if data.get("Response") == "False":
         error_msg = data.get("Error", "Неизвестная ошибка OMDb")
         if "Too many results" in error_msg:
-            error_msg = "Слишком много результатов — добавь год или больше деталей (например, 'Matrix 1999')"
+            error_msg = "Слишком много результатов. Уточните: добавьте год или выберите тип (фильм/сериал)"
         return {
             "results": [],
             "total_results": 0,
@@ -43,16 +49,16 @@ async def search_media(query: str):
     results = []
 
     for item in data.get("Search", []):
-        media_type = "tv" if item.get("Type") == "series" else "movie"
+        m_type = "tv" if item.get("Type") == "series" else "movie"
         title = item.get("Title", "Без названия")
-        year = item.get("Year", "Год неизвестен")
+        year_str = item.get("Year", "Год неизвестен")
         poster_url = item.get("Poster") if item.get("Poster") != "N/A" else POSTER_PLACEHOLDER
 
         results.append({
             "imdb_id": item.get("imdbID"),
             "title": title,
-            "year": year,
-            "media_type": media_type,
+            "year": year_str,
+            "media_type": m_type,
             "overview": "",
             "poster_url": poster_url
         })
