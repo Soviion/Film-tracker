@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Query
 import httpx
-from .tmdb import search_media
+from .omdb import search_media
 
 app = FastAPI(title="Личный трекер фильмов и сериалов")
 
