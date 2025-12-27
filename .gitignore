@@ -1,26 +1,17 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
+# Virtual environment
 venv/
 .venv/
-pip-wheel-metadata/
-*.egg-info/
-.installed.cfg
-*.egg
+env/
+
+# Python cache
+__pycache__/
+*.pyc
 
 # Environment variables
 .env
 
-# Database
-*.db
-*.sqlite3
-
-# VS Code
+# VS Code settings
 .vscode/
 
-# Other
-.DS_Store
+# Database (если будет локальный sqlite, но у нас PostgreSQL)
+*.sqlite3
